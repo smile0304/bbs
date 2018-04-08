@@ -1,4 +1,4 @@
-
+{% from "common/_macros.html" import static %}
 <!DOCTYPE html>
 <html lang="zh-CN">
   <head>
@@ -17,7 +17,7 @@
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 
     <!-- Custom styles for this template -->
-    <link href="{{ url_for('static',filename='cms/css/signin.css') }}" rel="stylesheet">
+    <link href="{{ static('cms/css/signin.css') }}" rel="stylesheet">
 
   </head>
 
