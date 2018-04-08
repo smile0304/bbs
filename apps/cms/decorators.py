@@ -1,5 +1,5 @@
 #encoding: utf-8
-from flask import session,redirect,url_for
+from flask import session,redirect,url_for,request
 from functools import wraps
 import config
 
@@ -9,7 +9,7 @@ def login_required(func):
         if config.CMS_USER_ID in session:
             return func(*args,**kwargs)
         else:
-            session["login_error"] = "操作前请先登录"
-            return redirect(url_for('cms.login'))
+            session["login_info"] = "操作前请先登录"
+            return redirect(url_for('cms.login',next=request.url))
     return inner
 
