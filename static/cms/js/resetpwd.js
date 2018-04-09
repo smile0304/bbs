@@ -24,10 +24,21 @@ $(function (){
                 'newpwd2':newpwd2,
             },
             'success':function(data){
-                console.log(data);
+                if(data['code'] == 200){
+                    ttalert.alertSuccessToast("密码修改成功")
+                    oldpwdE.val("");
+                    newpwdE.val("");
+                    newpwdE2.val("");
+                }else{
+                    var message = data["message"];
+                    ttalert.alertError(message);
+                    oldpwdE.val("");
+                    newpwdE.val("");
+                    newpwdE2.val("");
+                }
             },
             'fail':function (error) {
-                console.log(error)
+                ttalert.alertNetworkError();
             }
         })
     })

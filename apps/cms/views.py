@@ -85,6 +85,14 @@ class RestPwdView(views.MethodView):
         else:
            return restful.parms_error(form.get_error())
 
+class ResetEmailView(views.MethodView):
+    decorators = [login_required]
 
+    def get(self):
+        return render_template('cms/cms_resetmail.html')
+
+    def post(self):
+        pass
 bp.add_url_rule('/login/',view_func=LoginViwe.as_view('login'))
 bp.add_url_rule('/resetpwd/',view_func=RestPwdView.as_view('resetpwd'))
+bp.add_url_rule('/resetemail/',view_func=ResetEmailView.as_view('resetemail'))
