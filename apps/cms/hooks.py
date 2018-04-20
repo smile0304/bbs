@@ -1,7 +1,7 @@
 #encoding: utf-8
 from flask import session,g
 from .views import bp
-from .models import CMSUser
+from .models import CMSUser,CMSPersmisson
 import config
 
 @bp.before_request
@@ -11,3 +11,7 @@ def before_request():
         user = CMSUser.query.get(user_id)
         if user:
             g.cms_user = user
+
+@bp.context_processor
+def cms_context_processor():
+    return {"CMSPermission" : CMSPersmisson}
