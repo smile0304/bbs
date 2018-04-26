@@ -8,11 +8,20 @@ from flask import (
     redirect,
     url_for,
     g,
-    jsonify,
+    jsonify
 )
 
-from .forms import LoginForm,ResetpwdForm,ResetEmailForm
+from .forms import (
+    LoginForm,
+    ResetpwdForm,
+    ResetEmailForm,
+    AddBannerForm,
+    UpdateBannerForm,
+    AddBoardForm,
+    UpdateBoardForm
+)
 from .models import CMSUser,CMSPersmisson
+from ..models import BannerModel,BoardModel
 from .decorators import login_required,permission_required
 import config
 from exts import db,mail
@@ -40,7 +49,6 @@ def logout():
 @login_required
 def profile():
     return render_template("cms/cms_profile.html")
-
 
 class LoginViwe(views.MethodView):
     def get(self,message=None):
@@ -106,6 +114,7 @@ class ResetEmailView(views.MethodView):
         else:
             return restful.parms_error(form.get_error())
 
+
 @bp.route('/email_captcha/')
 def email_captcha():
     email = request.args.post('email')
@@ -142,8 +151,60 @@ def comments():
 @login_required
 @permission_required(CMSPersmisson.BORDER)
 def boards():
-    return render_template('cms/cms_boards.html')
+    boards =BoardModel.query.order_by(BoardModel.create_time.desc()).all()
+    context = {
+        "boards": boards
+    }
+    return render_template('cms/cms_boards.html',**context)
 
+
+@bp.route('/aboards/',methods=['post'])
+@login_required
+@permission_required(CMSPersmisson.BORDER)
+def aboards():
+    form = AddBoardForm(request.form)
+    if form.validate():
+        name = form.name.data
+        board = BoardModel(name=name)
+        db.session.add(board)
+        db.session.commit()
+        return restful.success()
+    else:
+        return restful.parms_error(message=form.get_error())
+
+
+@bp.route('/uboards/',methods=['post'])
+@login_required
+@permission_required(CMSPersmisson.BORDER)
+def uboards():
+    form = UpdateBoardForm(request.form)
+    if form.validate():
+        board_id = form.board_id.data
+        name = form.name.data
+        board = BoardModel.query.get(board_id)
+        if board:
+            board.name = name
+            db.session.commit()
+            return restful.success()
+        else:
+            return restful.parms_error(message="没有这个板块")
+    else:
+        return restful.parms_error(message=form.get_error())
+
+
+@bp.route('/dboards/',methods=['post'])
+@login_required
+@permission_required(CMSPersmisson.BORDER)
+def dboards():
+    board_id = request.form.get("board_id")
+    if not board_id:
+        return restful.parms_error("请传入模板ID")
+    board = BoardModel.query.get(board_id)
+    if not board:
+        return restful.parms_error(message="没有这个板块")
+    db.session.delete(board)
+    db.session.commit()
+    return restful.success()
 
 @bp.route('/fusers/')
 @login_required
@@ -172,6 +233,71 @@ def send_email():
     mail.send(message)
     return "success!"
 """
+
+@bp.route('/banners/')
+@login_required
+def banners():
+    banners = BannerModel.query.order_by(BannerModel.priority.desc()).all()
+    return render_template("cms/cms_banners.html",banners=banners)
+
+
+@bp.route('/abanner/',methods=['POST'])
+@login_required
+def abanner():
+    form = AddBannerForm(request.form)
+    if form.validate():
+        name = form.name.data
+        image_url = form.image_url.data
+        link_url = form.link_url.data
+        priority = form.priority.data
+        banner = BannerModel(name=name,image_url=image_url,link_url=link_url,priority=priority)
+        db.session.add(banner)
+        db.session.commit()
+        return restful.success()
+    else:
+        return restful.parms_error(message=form.get_error())
+
+
+@bp.route('/ubanner/',methods=['POST'])
+@login_required
+def ubanner():
+    form = UpdateBannerForm(request.form)
+    if form.validate():
+        banner_id = form.banner_id.data
+        name = form.name.data
+        image_url = form.image_url.data
+        link_url = form.link_url.data
+        priority = form.priority.data
+        banner = BannerModel.query.get(banner_id)
+        if banner:
+            banner.name = name
+            banner.image_url = image_url
+            banner.link_url = link_url
+            banner.priority = priority
+            db.session.commit()
+            return restful.success()
+        else:
+            return restful.parms_error(message="没有这个轮播图")
+    else:
+        return restful.parms_error(message=form.get_error())
+
+
+@bp.route('/dbanner/',methods=['POST'])
+@login_required
+def banner():
+    banner_id = request.form.get('banner_id')
+    if not banner_id:
+        return restful.parms_error(message="请传入要删除的图片")
+
+    banner = BannerModel.query.get(banner_id)
+    if not banner:
+        return restful.parms_error(message="没有这个轮播图")
+
+    db.session.delete(banner)
+    db.session.commit()
+    return restful.success()
+
+
 bp.add_url_rule('/login/',view_func=LoginViwe.as_view('login'))
 bp.add_url_rule('/resetpwd/',view_func=RestPwdView.as_view('resetpwd'))
 bp.add_url_rule('/resetemail/',view_func=ResetEmailView.as_view('resetemail'))

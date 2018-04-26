@@ -1,0 +1,15 @@
+.main-container{
+    width: 990px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.lg-containter{
+    width: 730px;
+    float: left;
+}
+
+.sm-containter{
+    width: 250px;
+    float: right;
+}

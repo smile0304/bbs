@@ -1,8 +1,8 @@
 #encoding: utf-8
 
 from ..forms import BaseForm
-from wtforms import StringField
-from wtforms.validators import Regexp,EqualTo,ValidationError,Email
+from wtforms import StringField,IntegerField
+from wtforms.validators import Regexp,EqualTo,ValidationError,InputRequired
 from utils import ttcache
 
 class SingupForm(BaseForm):
@@ -18,7 +18,7 @@ class SingupForm(BaseForm):
         telephone = self.telephone.data
 
         sms_captcha_mem = ttcache.get(telephone)
-        if not sms_captcha_mem and sms_captcha_mem.lower != sms_captcha.lower():
+        if not sms_captcha_mem and sms_captcha_mem.lower() != sms_captcha.lower():
             raise ValidationError(message="短信验证码错误!")
 
     def validate_graph_captcha(self,field):
@@ -27,3 +27,13 @@ class SingupForm(BaseForm):
 
         if not graph_captcha_mem:
             raise ValidationError(message="图形验证码错误!")
+
+class SinginForm(BaseForm):
+    telephone = StringField(validators=[Regexp(r"1[34578]\d{9}", message="请输入正确的手机号")])
+    password = StringField(validators=[EqualTo("password", message="两次输入的密码不同")])
+    remeber = StringField()
+
+class AddPostForm(BaseForm):
+    title = StringField(validators=[InputRequired(message="请输入标题!")])
+    content = StringField(validators=[InputRequired(message="请输入内容")])
+    board_id = IntegerField(validators=[InputRequired(message="请输入板块ID")])

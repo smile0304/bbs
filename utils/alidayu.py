@@ -1,4 +1,4 @@
-# 知了课堂-阿里大于短信验证码sdk
+# 阿里大于短信验证码sdk
 import hashlib
 from time import time
 import logging

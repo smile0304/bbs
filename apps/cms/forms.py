@@ -33,3 +33,18 @@ class ResetEmailForm(BaseForm):
         user = g.cms_user
         if user.email == email:
             raise ValidationError("请使用不同的邮箱")
+
+class AddBannerForm(BaseForm):
+    name = StringField(validators=[InputRequired(message="请输入轮播图名称")])
+    image_url = StringField(validators=[InputRequired(message="请输入轮播图地址")])
+    link_url = StringField(validators=[InputRequired(message="请输入轮播图跳转地址")])
+    priority = IntegerField(validators=[InputRequired(message="请输入轮播图优先级")])
+
+class UpdateBannerForm(AddBannerForm):
+    banner_id = IntegerField(validators=[InputRequired(message="请输入轮播图的id")])
+
+class AddBoardForm(BaseForm):
+    name = StringField(validators=[InputRequired(message="请输入板块名称")])
+
+class UpdateBoardForm(AddBoardForm):
+    board_id = IntegerField(validators=[InputRequired(message="请输入板块ID!")])
