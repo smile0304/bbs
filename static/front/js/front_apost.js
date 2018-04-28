@@ -22,9 +22,9 @@ $(function () {
                 if(data['code']==200){
                     ttalert.alertConfirm({
                         'msg':"恭喜,帖子发表成功!",
-                        'cancelButtonText':'index',
-                        'confirmText':'againt',
-                        'cancelText':function () {
+                        'cancelText':"回到首页",
+                        'confirmText':'再发一篇',
+                        'cancelCallback':function () {
                             window.location = '/'
                         },
                         'confirmCallback':function () {

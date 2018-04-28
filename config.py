@@ -42,3 +42,11 @@ UEDITOR_QINIU_ACCESS_KEY = "ysrNF8IDwKfsATrLxMDbRLbl3AOxu1Qzk3SSA42E"
 UEDITOR_QINIU_SECRET_KEY = "g3T4G66brMWUY8fP3AXlIl_WZ3yep-VkUaPAgc-K"
 UEDITOR_QINIU_BUCKET_NAME = "flask-study"
 UEDITOR_QINIU_DOMAIN = 'http://file.smilehacker.net/'
+
+#flask-paginate的相关配置
+PER_PAGE = 10
+
+#flask celery相关配置
+
+CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"

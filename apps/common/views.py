@@ -8,6 +8,7 @@ from utils import ttcache
 from io import BytesIO
 import qiniu
 import config
+from tasks import send_sms_captcha
 
 bp = Blueprint("common",__name__,url_prefix='/c')
 
@@ -32,15 +33,8 @@ def sms_captcha():
     if form.validate():
         telephone = form.telephone.data
         captcha = Captcha.gene_text(number=4)
-        if alidayu.send_sms(telephone, code=captcha):
-            print(captcha)
-            ttcache.set(telephone,captcha)
-            return restful.success()
-        else:
-            #return restful.parms_error()
-            print(captcha)
-            ttcache.set(telephone, captcha)
-            return restful.success()
+        send_sms_captcha(telephone,captcha=captcha)
+        return restful.success()
     else:
         return restful.parms_error(message="参数错误!")
 

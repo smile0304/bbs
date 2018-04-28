@@ -26,7 +26,7 @@ $(function () {
                         window.location = '/';
                     }
                 }else{
-                    ttalert.alertError(data['message']);
+                    ttalert.alertInfo(data['message']);
                 }
             }
 

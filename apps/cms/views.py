@@ -21,7 +21,7 @@ from .forms import (
     UpdateBoardForm
 )
 from .models import CMSUser,CMSPersmisson
-from ..models import BannerModel,BoardModel
+from ..models import BannerModel,BoardModel,PostModel,HighlightModel
 from .decorators import login_required,permission_required
 import config
 from exts import db,mail
@@ -29,6 +29,7 @@ from flask_mail import Message
 from utils import restful,ttcache
 import string
 import random
+from tasks import send_mail,send_sms_captcha
 bp = Blueprint("cms",__name__,url_prefix='/cms')
 
 
@@ -117,7 +118,7 @@ class ResetEmailView(views.MethodView):
 
 @bp.route('/email_captcha/')
 def email_captcha():
-    email = request.args.post('email')
+    email = request.args.get('email')
     if not email:
         return restful.parms_error("请传递邮箱")
     #给这个邮箱发送邮件
@@ -125,10 +126,12 @@ def email_captcha():
     source.extend(map(lambda x:str(x),range(0,10)))
     captcha = "".join(random.sample(source,6))
     message = Message("bbs邮箱验证",recipients=['smile@smilehacker.net'],body="您的验证码是:%s" % captcha)
-    try:
-        mail.send(message)
-    except:
-        return restful.server_error()
+
+    # try:
+    #     mail.send(message)
+    # except:
+    #     return restful.server_error()
+    send_mail.delay('bbs邮箱验证',[email],'您的验证码是:%s'%captcha)
     ttcache.set(email,captcha)
     return restful.success()
 
@@ -137,7 +140,41 @@ def email_captcha():
 @login_required
 @permission_required(CMSPersmisson.POSTER)
 def posts():
-    return render_template('cms/cms_posts.html')
+    context = {
+        'posts':PostModel.query.all()
+    }
+    return render_template('cms/cms_posts.html',**context)
+
+@bp.route('/hpost/',methods=['post'])
+@login_required
+@permission_required(CMSPersmisson.POSTER)
+def hpost():
+    post_id =request.form.get('post_id')
+    if not post_id:
+        return restful.parms_error("请传入帖子ID")
+    post = PostModel.query.get(post_id)
+    if not post:
+        return restful.parms_error("没有这篇帖子")
+    highlight = HighlightModel()
+    highlight.post = post
+    db.session.add(highlight)
+    db.session.commit()
+    return restful.success()
+
+@bp.route('/uhpost/',methods=['post'])
+@login_required
+@permission_required(CMSPersmisson.POSTER)
+def uhpost():
+    post_id =request.form.get('post_id')
+    if not post_id:
+        return restful.parms_error("请传入帖子ID")
+    post = PostModel.query.get(post_id)
+    if not post:
+        return restful.parms_error("没有这篇帖子")
+    highlight = HighlightModel.query.filter_by(post_id=post_id).first()
+    db.session.delete(highlight)
+    db.session.commit()
+    return restful.success()
 
 
 @bp.route('/comments/')

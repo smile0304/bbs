@@ -26,5 +26,26 @@ class PostModel(db.Model):
     content = db.Column(db.Text,nullable=False)
     create_time = create_time = db.Column(db.DateTime,default=datetime.now)
     board_id = db.Column(db.Integer,db.ForeignKey("board.id"))
+    author_id = db.Column(db.String(100),db.ForeignKey("front_user.id"),nullable=False)
 
-    board = db.relationship("BoardModel",backref="posts")
+    board = db.relationship("BoardModel", backref="posts")
+    author = db.relationship("FrontUser",backref="posts")
+
+class CommentModel(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    content = db.Column(db.Text, nullable=False)
+    create_time = create_time = db.Column(db.DateTime, default=datetime.now)
+
+    post_id = db.Column(db.Integer,db.ForeignKey("post.id"))
+    author_id = db.Column(db.String(100), db.ForeignKey("front_user.id"), nullable=False)
+
+    post = db.relation("PostModel",backref="comments")
+    author = db.relationship("FrontUser", backref="comments")
+
+class HighlightModel(db.Model):
+    __tablename__ = 'highlight_post'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    post_id = db.Column(db.Integer,db.ForeignKey('post.id'))
+    create_time = create_time = db.Column(db.DateTime, default=datetime.now)
+
+    post = db.relationship("PostModel",backref="highlight")
